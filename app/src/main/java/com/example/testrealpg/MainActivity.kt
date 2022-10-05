@@ -1,13 +1,13 @@
 package com.example.testrealpg
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.util.Log
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlin.math.log
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -30,37 +30,35 @@ class MainActivity : AppCompatActivity() {
 //                progress = 0f
 //            }
 //        }
-//        for (i in 0..5000){
-//            Thread.sleep(10)
-//            motionProcess.setProgress(i.toFloat())
-//        }
-        val sum = cloneData().sumOf { it }
-        val sum1 = cloneData1().sumOf { it }
-        val sum2 = cloneData3().sumOf { it }
 
+        val total = 100000L
+        val free = 20000L
 
+        btnABC.setOnClickListener {
+            motionProcess.setProgress(6000,10000L,3000L)
+        }
     }
 
-    fun cloneData() : MutableList<Int> {
-        val mList1 = mutableListOf<Int>()
-        for (i in 0..50){
-            mList1.add(Random.nextInt(10))
+    fun cloneData(): MutableList<Long> {
+        val mList1 = mutableListOf<Long>()
+        for (i in 0..50) {
+            mList1.add(Random.nextLong(1000))
         }
         return mList1
     }
 
-    fun cloneData1() : MutableList<Int> {
+    fun cloneData1(): MutableList<Int> {
         val mList2 = mutableListOf<Int>()
-        for (i in 0..50){
-            mList2.add(Random.nextInt(10))
+        for (i in 0..50) {
+            mList2.add(Random.nextInt(1000))
         }
         return mList2
     }
 
-    fun cloneData3() : MutableList<Int> {
+    fun cloneData3(): MutableList<Int> {
         val mList2 = mutableListOf<Int>()
-        for (i in 0..50){
-            mList2.add(Random.nextInt(10))
+        for (i in 0..50) {
+            mList2.add(Random.nextInt(1000))
         }
         return mList2
     }

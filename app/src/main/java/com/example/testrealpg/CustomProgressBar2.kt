@@ -1,24 +1,25 @@
 package com.example.testrealpg
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
+import android.os.CountDownTimer
 import android.util.AttributeSet
 import android.view.View
-import com.example.testrealpg.CommonUtils.Companion.screenHeight
-import com.example.testrealpg.CommonUtils.Companion.screenWidth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.math.min
+
 
 class CustomProgressBar2(context: Context, attrs: AttributeSet) :
     View(context, attrs) {
-    val widthScreen: Float = context.screenWidth.toFloat()
-    val heightScreen: Float = context.screenHeight.toFloat()
     private var redProcess: Float = 0f
     private var orangeProcess: Float = 0f
-    val total = 100f
 
-    var mRectWhite = RectF(0f, 0f, widthScreen, height.toFloat())
+    var mRectWhite = RectF(0f, 0f, width.toFloat(), height.toFloat())
     var mRectRed = RectF(0f, 0f, redProcess, height.toFloat())
     var mRectOrange = RectF(0f, 0f, orangeProcess, height.toFloat())
 
@@ -55,12 +56,10 @@ class CustomProgressBar2(context: Context, attrs: AttributeSet) :
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-        mRectWhite = RectF(0f, 0f, widthScreen, height.toFloat())
-        //draw rect
+        mRectWhite = RectF(0f, 0f, width.toFloat() , height.toFloat())
         canvas.drawRoundRect(mRectWhite, 100f, 100f, mainPaint)
         canvas.drawRoundRect(mRectOrange, 100f, 100f, orangePaint)
-        canvas.drawRoundRect(mRectRed!!, 100f, 100f, redPaint)
+        canvas.drawRoundRect(mRectRed, 100f, 100f, redPaint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -85,13 +84,45 @@ class CustomProgressBar2(context: Context, attrs: AttributeSet) :
         setMeasuredDimension(width, height)
     }
 
+    var tempRed = 0f
+    var tempOrange = 0f
 
-    fun setProgress(redProgress: Float = 0f, orangeProgress: Float = 0f) {
-        this.redProcess = redProgress * widthScreen
-        this.orangeProcess = redProcess + orangeProgress * widthScreen
-        mRectRed = RectF(0f, 0f, redProcess, height.toFloat())
-        mRectOrange = RectF(0f, 0f, orangeProcess, height.toFloat())
-        invalidate()
+    fun setProgress(redProgress: Long = 0L, total: Long = 0L, freeSpace: Long = 0L) {
+        val percentRed = redProgress.toFloat() * width.toFloat() / total.toFloat()
+        val percentFree = freeSpace.toFloat() * width.toFloat() / total.toFloat()
+        val percentOrange = (total - freeSpace).toFloat() * width.toFloat() / total.toFloat()
+
+        object : CountDownTimer(2000, 1) {
+            override fun onTick(p0: Long) {
+                CoroutineScope(Dispatchers.Default).launch {
+                    if (tempRed < percentRed) {
+                        tempRed += (percentRed / 70)
+                    }
+                    redProcess = tempRed
+                    if (tempOrange < percentOrange) {
+                        tempOrange += percentOrange / 70
+                    }
+                    orangeProcess = tempOrange
+                    mRectOrange = RectF(0f, 0f, orangeProcess, height.toFloat())
+                    mRectRed = RectF(0f, 0f, redProcess as Float, height.toFloat())
+                    invalidate()
+                }
+//                setProgressAnimate(percent = redProcess, percentRed.toFloat())
+            }
+            override fun onFinish() {
+
+            }
+
+        }.start()
+    }
+
+    private fun setProgressAnimate(percent: Float, total: Float) {
+        val animation = ValueAnimator.ofFloat(total, percent)
+        animation.duration = 10000
+        animation.addUpdateListener {
+            mRectRed = RectF(0f, 0f, it.animatedValue as Float, height.toFloat())
+        }
+        animation.start()
     }
 
 }
